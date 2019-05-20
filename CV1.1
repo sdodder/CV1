@@ -1,0 +1,51 @@
+import cv2
+import numpy as np
+
+cap = cv2.VideoCapture(1)
+
+color1 = [[[0,0,255]]]
+color1RGB = np.uint8(color1)
+hsv_color1 = cv2.cvtColor(color1RGB,cv2.COLOR_BGR2HSV)
+color1Indx = hsv_color1[0,0,0]
+
+color2 = [[[0,255,0]]]
+color2RGB = np.uint8(color2)
+hsv_color2 = cv2.cvtColor(color2RGB,cv2.COLOR_BGR2HSV)
+color2Indx = hsv_color2[0,0,0]
+
+while(1):
+
+    # Take each frame
+    _, frame = cap.read()
+
+    # Convert BGR to HSV
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # define range of color1 in HSV
+    lower_color1 = np.array([color1Indx-10,100,100])
+    upper_color1 = np.array([color1Indx+10,255,255])
+
+    # define range of color2 in HSV
+    lower_color2 = np.array([color2Indx-10,100,100])
+    upper_color2 = np.array([color2Indx+10,255,255])
+
+    # Threshold the HSV image to get only color1
+    mask1 = cv2.inRange(hsv, lower_color1, upper_color1)
+
+    # Threshold the HSV image to get only color2
+    mask2 = cv2.inRange(hsv, lower_color2, upper_color2)
+
+    # Threshold for both colors
+    mask = cv2.bitwise_xor(mask1, mask2)
+
+    # Bitwise-AND mask and original image
+    res = cv2.bitwise_and(frame, frame, mask= mask)
+
+    #cv2.imshow('frame',frame)
+    #cv2.imshow('mask',mask)
+    cv2.imshow('res',res)
+    k = cv2.waitKey(5) & 0xFF
+    if k == 27:
+        break
+
+cv2.destroyAllWindows()
